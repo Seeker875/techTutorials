@@ -23,27 +23,31 @@ def shiftDown(data,idx):
         #print(f'leftChild  {leftChild}') # 
        
         #
-        minWorker = data[minIdx]
+        
         if  leftChild <= size:
             leftWorker = data[leftChild]
-
+            minWorker = data[minIdx]
             if leftWorker.jobTime < minWorker.jobTime:
                  minIdx = leftChild
+            elif leftWorker.jobTime == minWorker.jobTime:   
+                if leftWorker.thread <  minWorker.thread:
+                    minIdx = leftChild
+         
+
 
         if  rightChild <= size:
             rightWorker = data[rightChild]
-
+            minWorker = data[minIdx]
             if rightWorker.jobTime < minWorker.jobTime:
                 minIdx= rightChild
+            elif rightWorker.jobTime == minWorker.jobTime:   
+                if rightWorker.thread <  minWorker.thread:
+                    minIdx = rightChild
 
         if  minIdx !=idx:
-            #tempVal = data[minIdx]
-            #data[minIdx] = data[idx]
-            #data[idx] = tempVal
-           ## data[minIdx], data[idx]=  data[idx], data[minIdx]   
+            
             data[idx], data[minIdx] = data[minIdx], data[idx]
-            #swaps.append(shiftDown(data,minIdx))
-            #swaps.append(*shiftDown(data,minIdx))
+        
             idx=minIdx
         else:
             break;
@@ -67,17 +71,24 @@ def assign_jobs(n_workers, jobs):
     result = []
     workerList=[]
     # initiating with job time as zero
+    next_free_time = [0] * n_workers
     for i in range(n_workers):
         #Giving workers a thread and job time
         workerList.append(worker(i,0))
     for job in jobs:
         next_worker = workerList.pop(0) 
+       # next_worker = workerList[0] 
 
         result.append(AssignedJob(next_worker.thread,next_worker.jobTime))
         #keeping the thread same and inserting current job time
         # insering at the top of heapq
-        workerList.insert(0,(next_worker.thread,job))
+        next_free_time[next_worker.thread] += job
+        workerList.insert(0,worker(next_worker.thread, next_free_time[next_worker.thread] ))
+      # Immutable named tuple, cant set attribute erro
+       # next_worker.jobTime+ = job
+        #next_worker._replace(jobTime=next_worker.jobTime+job)
 
+        #workerList[0] =  next_worker
         workerList=shiftDown(workerList,0)
     return result
 
